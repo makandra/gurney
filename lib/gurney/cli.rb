@@ -2,6 +2,8 @@ require 'optparse'
 require 'securerandom'
 require 'colorize'
 require 'open3'
+require 'git'
+require 'fileutils'
 
 module Gurney
   class CLI
@@ -13,18 +15,19 @@ module Gurney
 
       begin
         if options.hook
-          # when run as hook we need to clone the bare repository
           tmp_dir = options.tmp_dir
           work_dir = tmp_dir + '/work_dir_' + SecureRandom.hex(8)
           Dir.mkdir tmp_dir
           Dir.mkdir work_dir
 
-          # clone to tmp dir
-          output, status = Open3.capture2e("git clone $GIT_DIR #{work_dir}")
-          unless status.success?
-            raise "git clone failed\n#{output}"
-          end
+          g = Git.clone(ENV['GIT_DIR'], work_dir)
           Dir.chdir(work_dir)
+        else
+          work_dir = '.'
+          unless Dir.exists? './.git'
+            raise Gurney::Error.new('Must be run within a git repository')
+          end
+          g = Git.open(work_dir)
         end
 
         if File.exists? options.config_file
@@ -37,9 +40,8 @@ module Gurney
             # dont run as a hook with no config
             exit 0
           elsif [options.project_id, options.api_url, options.api_token].any?(&:nil?)
-            puts "No config file found.\n".red +
-                 "Either provide a config file or set the flags for project id, api url and api token".red
-            exit -1
+            raise Gurney::Error.new("No config file found.\n"+
+              "Either provide a config file or set the flags for project id, api url and api token")
           else
             config = Gurney::Config.new(branches: nil, **options.slice(:api_url, :api_token, :project_id))
           end
@@ -58,21 +60,16 @@ module Gurney
           end
 
         else
-          work_dir = '.'
-          current_branch, _= Open3.capture3("git rev-parse --abbrev-ref HEAD")
-          current_branch.gsub!("\n", '')
+          current_branch = g.current_branch
           unless config.branches.nil? || config.branches.include?(current_branch)
-            raise 'The current branch is not specified in the config.'
+            raise Gurney::Error.new('The current branch is not specified in the config.')
           end
           branches << current_branch
         end
 
         branches.each do |branch|
-          if options[:hook]
-            output, status = Open3.capture2e("git --git-dir=#{work_dir + '/.git'} --work-tree=#{work_dir} checkout #{branch}")
-            unless status.success?
-              raise "git checkout failed\n#{output}"
-            end
+          if options.hook
+            g.checkout branch
           end
 
           dependencies = []
@@ -85,6 +82,7 @@ module Gurney
 
           dependencies.compact!
 
+
           api = Gurney::Api.new(base_url: config.api_url, token: config.api_token)
           api.post_dependencies(dependencies: dependencies, branch: branch, project_id: config.project_id)
         end
@@ -93,12 +91,20 @@ module Gurney
       rescue Gurney::ApiError => e
         puts "api error:".red
         puts e.message.red
-      rescue Exception => e
+      rescue Gurney::Error => e
         puts "error:".red
+        puts e.message.red
+      rescue Exception => e
+        puts "an unexpected error occurred:".red
         puts "#{e.full_message}"
       ensure
-        `rm -Rf #{tmp_dir}`
+        if options.hook
+         FileUtils.rm_rf tmp_dir
+        end
       end
     end
+  end
+
+  class Error < Exception
   end
 end

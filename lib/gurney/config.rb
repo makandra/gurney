@@ -13,8 +13,10 @@ module Gurney
     end
 
     def self.from_file(filename)
-      config = YAML.load_file(filename).map{|(k,v)| [k.to_sym,v]}.to_h
-      new(**config)
+      if File.exists? filename
+        config = YAML.load_file(filename).map{|(k,v)| [k.to_sym,v]}.to_h
+        new(**config)
+      end
     end
 
   end

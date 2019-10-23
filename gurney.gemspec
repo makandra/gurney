@@ -9,4 +9,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'colorize', '~> 0.8'
   s.add_runtime_dependency 'httparty', '~> 0.17.1'
   s.add_runtime_dependency 'bundler', '~> 1.17'
+  s.add_runtime_dependency 'git', '~> 1.5'
 end

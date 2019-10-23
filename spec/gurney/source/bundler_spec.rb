@@ -2,7 +2,7 @@ describe Gurney::Source::Bundler do
 
   describe 'dependencies' do
     it 'parses correct bundler lockfiles' do
-      bundler = Gurney::Source::Bundler.new(filename: 'spec/fixtures/Gemfile.lock')
+      bundler = Gurney::Source::Bundler.new(filename: 'spec/fixtures/test_project/Gemfile.lock')
       dependencies = bundler.dependencies
 
       expect(dependencies.count).to eq 5
