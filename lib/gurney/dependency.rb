@@ -17,5 +17,12 @@ module Gurney
       }.to_json(*args)
     end
 
+    def ==(other)
+      other.class == self.class &&
+      other.ecosystem == ecosystem &&
+      other.name == name &&
+      other.version == version
+    end
+
   end
 end

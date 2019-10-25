@@ -3,8 +3,6 @@ require 'httparty'
 module Gurney
   class Api
 
-    attr_reader :base_url
-
     def initialize(base_url:, token:)
       @base_url = base_url
       @token = token

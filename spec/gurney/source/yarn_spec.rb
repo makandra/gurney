@@ -1,7 +1,7 @@
 describe Gurney::Source::Yarn do
 
   describe 'dependencies' do
-    it 'parses correct xarn lockfiles' do
+    it 'parses correct yarn lockfiles' do
       yarn = Gurney::Source::Yarn.new(filename: 'spec/fixtures/test_project/yarn.lock')
       dependencies = yarn.dependencies
 
