@@ -1,3 +1,4 @@
 .idea/
 *.gem
 .byebug_history
+gurney.yml

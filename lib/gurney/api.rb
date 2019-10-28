@@ -29,7 +29,11 @@ module Gurney
           'Content-Type': 'application/json'},
       )
       unless response.success?
-        raise ApiError.new("#{response.code} #{response.body}")
+        if response.code == 404
+          raise ApiError.new("#{response.code} api url is probably wrong")
+        else
+          raise ApiError.new("#{response.code} #{response.body}")
+        end
       end
     end
 
