@@ -10,8 +10,8 @@ module Gurney
 
     HOOK_STDIN_REGEX = /(?<old>[0-9a-f]{40}) (?<new>[0-9a-f]{40}) refs\/heads\/(?<ref>\w+)/m
 
-    def self.run
-      options = Gurney::CLI::OptionParser.parse(ARGV)
+    def self.run(cmd_parameter=[])
+      options = Gurney::CLI::OptionParser.parse(cmd_parameter)
 
       begin
         if options.hook

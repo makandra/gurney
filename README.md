@@ -1,4 +1,4 @@
-##Gurney
+## Gurney
 
 Gurney is a small tool to extract dependencies from project files and report them to a web api.
 It can either run locally or as a git post-receive hook in gitlab.

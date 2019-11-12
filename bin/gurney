@@ -2,4 +2,4 @@
 
 require 'gurney'
 
-Gurney::CLI.run
+Gurney::CLI.run(ARGV)

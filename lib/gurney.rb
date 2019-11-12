@@ -1,3 +1,4 @@
+require_relative 'gurney/version'
 require_relative 'gurney/config'
 require_relative 'gurney/dependency'
 require_relative 'gurney/source/base'
