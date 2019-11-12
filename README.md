@@ -23,5 +23,15 @@ Usage: gurney [options]
                                      Prints this help
 ```
 
+#### Sample Config:
+```yaml
+project_id: 1
+branches:
+  - master
+  - production
+api_url: http://example.com/dep_reporter/project/<project_id>/branch/<branch>
+api_token: 1234567890
+```
+
 ##### Running as a global git hook
 To run as a global git hook in your gitlab see https://docs.gitlab.com/ee/administration/custom_hooks.html#set-a-global-git-hook-for-all-repositories
