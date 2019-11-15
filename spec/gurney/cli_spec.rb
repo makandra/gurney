@@ -17,7 +17,7 @@ describe Gurney::CLI do
 
     it 'does query the correct url' do
       expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
-      Gurney::CLI.run
+      expect{ Gurney::CLI.run }.to output(anything).to_stdout
     end
 
     it 'does report all dependencies to the api' do
@@ -34,7 +34,12 @@ describe Gurney::CLI do
           ),
           branch: 'master',
           project_id: '1').and_return(double)
-      Gurney::CLI.run
+      expect{ Gurney::CLI.run }.to output(anything).to_stdout
+    end
+
+    it 'prints success message to stdout' do
+      expect_any_instance_of(Gurney::Api).to receive(:post_json).with(anything, anything).and_return(double)
+      expect{ Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 3, rubygems: 5)\n").to_stdout
     end
 
   end

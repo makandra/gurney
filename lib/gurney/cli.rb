@@ -85,6 +85,9 @@ module Gurney
 
           api = Gurney::Api.new(base_url: config.api_url, token: config.api_token)
           api.post_dependencies(dependencies: dependencies, branch: branch, project_id: config.project_id)
+
+          dependency_counts = dependencies.group_by(&:ecosystem).map{|ecosystem, dependencies| "#{ecosystem}: #{dependencies.count}" }.join(', ')
+          puts "Gurney: reported dependencies (#{dependency_counts})"
         end
 
       rescue SystemExit
