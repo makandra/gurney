@@ -32,9 +32,11 @@ module Gurney
 
         if File.exists? options.config_file
           config = Gurney::Config.from_file(options.config_file)
-          config.api_token = options.api_token if options.api_token&.present?
-          config.api_url = options.api_url if options.api_url&.present?
-          config.project_id = options.project_id if options.project_id&.present?
+
+          options.branches ||= config.branches
+          options.api_token ||= config.api_token
+          options.api_url ||= config.api_url
+          options.project_id ||= config.project_id
         else
           if options.hook
             # dont run as a hook with no config
@@ -53,7 +55,7 @@ module Gurney
           $stdin.each_line do |line|
             matches = line.match(HOOK_STDIN_REGEX)
             unless matches[:new] == '0' * 40
-              if config.branches.include? matches[:ref]
+              if options.branches.include? matches[:ref]
                 branches << matches[:ref]
               end
             end
@@ -61,7 +63,7 @@ module Gurney
 
         else
           current_branch = g.current_branch
-          unless config.branches.nil? || config.branches.include?(current_branch)
+          unless options.branches.nil? || options.branches.include?(current_branch)
             raise Gurney::Error.new('The current branch is not specified in the config.')
           end
           branches << current_branch
@@ -83,8 +85,8 @@ module Gurney
           dependencies.compact!
 
 
-          api = Gurney::Api.new(base_url: config.api_url, token: config.api_token)
-          api.post_dependencies(dependencies: dependencies, branch: branch, project_id: config.project_id)
+          api = Gurney::Api.new(base_url: options.api_url, token: options.api_token)
+          api.post_dependencies(dependencies: dependencies, branch: branch, project_id: options.project_id)
 
           dependency_counts = dependencies.group_by(&:ecosystem).map{|ecosystem, dependencies| "#{ecosystem}: #{dependencies.count}" }.join(', ')
           puts "Gurney: reported dependencies (#{dependency_counts})"

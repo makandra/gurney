@@ -5,11 +5,11 @@ module Gurney
 
     attr_accessor :branches, :api_url, :api_token, :project_id
 
-    def initialize(branches:, api_url:, api_token:, project_id:)
+    def initialize(branches: nil, api_url: nil, api_token: nil, project_id: nil)
       @branches = branches
       @api_url = api_url
-      @api_token = api_token.to_s
-      @project_id = project_id.to_s
+      @api_token = api_token&.to_s
+      @project_id = project_id&.to_s
     end
 
     def self.from_file(filename)

@@ -42,5 +42,10 @@ describe Gurney::CLI do
       expect{ Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 3, rubygems: 5)\n").to_stdout
     end
 
+    it 'overwrites options from the config with command line parameter' do
+      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://test.example.com/project/2/branch/master', anything).and_return(double)
+      expect{ Gurney::CLI.run('-c incomplete_config.yml --project-id 2 --api-url http://test.example.com/project/<project_id>/branch/<branch>'.split(' ')) }.to output(anything).to_stdout
+    end
+
   end
 end

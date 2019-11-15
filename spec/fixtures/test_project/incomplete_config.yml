@@ -1,0 +1,5 @@
+project_id: 1
+branches:
+  - master
+  - production
+api_token: 1234567890
