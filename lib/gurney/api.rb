@@ -1,4 +1,5 @@
 require 'httparty'
+require 'cgi'
 
 module Gurney
   class Api
@@ -13,8 +14,8 @@ module Gurney
           dependencies: dependencies
       }
       url = base_url
-      url.gsub! '<project_id>', project_id
-      url.gsub! '<branch>', branch
+      url.gsub! '<project_id>', CGI.escape(project_id)
+      url.gsub! '<branch>', CGI.escape(branch)
       post_json(url, data.to_json)
     end
 
