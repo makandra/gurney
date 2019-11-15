@@ -12,9 +12,10 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/makandra/gurney"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files`.split("\n").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.files         = `git ls-files`.split("\n").reject { |f| f.match(%r{^(test|spec|features|bin)/}) }
   spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.bindir        = 'exe'
+  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency 'colorize', '~> 0.8'
