@@ -17,7 +17,7 @@ describe Gurney::CLI do
 
     it 'does query the correct url' do
       expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
-      expect{ Gurney::CLI.run }.to output(anything).to_stdout
+      silent { Gurney::CLI.run }
     end
 
     it 'does report all dependencies to the api' do
@@ -34,17 +34,27 @@ describe Gurney::CLI do
           ),
           branch: 'master',
           project_id: '1').and_return(double)
-      expect{ Gurney::CLI.run }.to output(anything).to_stdout
+      silent { Gurney::CLI.run }
     end
 
     it 'prints success message to stdout' do
       expect_any_instance_of(Gurney::Api).to receive(:post_json).with(anything, anything).and_return(double)
-      expect{ Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 3, rubygems: 5)\n").to_stdout
+      expect { Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 3, rubygems: 5)\n").to_stdout
     end
 
     it 'overwrites options from the config with command line parameter' do
       expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://test.example.com/project/2/branch/master', anything).and_return(double)
-      expect{ Gurney::CLI.run('-c incomplete_config.yml --project-id 2 --api-url http://test.example.com/project/<project_id>/branch/<branch>'.split(' ')) }.to output(anything).to_stdout
+      silent { Gurney::CLI.run('-c incomplete_config.yml --project-id 2 --api-url http://test.example.com/project/<project_id>/branch/<branch>'.split(' ')) }
+    end
+
+    it 'does work as a hook' do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("GIT_DIR").and_return(".git")
+      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
+
+      with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master') do
+        silent { Gurney::CLI.run('--hook'.split(' ')) }
+      end
     end
 
   end

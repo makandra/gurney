@@ -2,7 +2,7 @@ describe Gurney::Source::Yarn do
 
   describe 'dependencies' do
     it 'parses correct yarn lockfiles' do
-      yarn = Gurney::Source::Yarn.new(filename: 'spec/fixtures/test_project/yarn.lock')
+      yarn = Gurney::Source::Yarn.new(yarn_lock: File.read('spec/fixtures/test_project/yarn.lock'))
       dependencies = yarn.dependencies
 
       expect(dependencies.count).to eq 3

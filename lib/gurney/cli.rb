@@ -15,23 +15,16 @@ module Gurney
 
       begin
         if options.hook
-          tmp_dir = options.tmp_dir
-          work_dir = tmp_dir + '/work_dir_' + SecureRandom.hex(8)
-          Dir.mkdir tmp_dir
-          Dir.mkdir work_dir
-
-          g = Git.clone(ENV['GIT_DIR'], work_dir)
-          Dir.chdir(work_dir)
+          g = Git.bare(ENV['GIT_DIR'])
         else
-          work_dir = '.'
           unless Dir.exists? './.git'
             raise Gurney::Error.new('Must be run within a git repository')
           end
-          g = Git.open(work_dir)
+          g = Git.open('.')
         end
 
-        if File.exists? options.config_file
-          config = Gurney::Config.from_file(options.config_file)
+        if g.ls_tree("master")['blob'].key?(options.config_file)
+          config = Gurney::Config.from_yaml(g.show("master:#{options.config_file}"))
 
           options.branches ||= config.branches
           options.api_token ||= config.api_token
@@ -41,12 +34,11 @@ module Gurney
           if options.hook
             # dont run as a hook with no config
             exit 0
-          elsif [options.project_id, options.api_url, options.api_token].any?(&:nil?)
-            raise Gurney::Error.new("No config file found.\n"+
-              "Either provide a config file or set the flags for project id, api url and api token")
-          else
-            config = Gurney::Config.new(branches: nil, **options.slice(:api_url, :api_token, :project_id))
           end
+        end
+
+        if [options.project_id, options.branches, options.api_url, options.api_token].any?(&:nil?)
+          raise Gurney::Error.new("Either provide in a config file or set the flags for project id, branches, api url and api token")
         end
 
         branches = []
@@ -70,20 +62,21 @@ module Gurney
         end
 
         branches.each do |branch|
-          if options.hook
-            g.checkout branch
-          end
-
           dependencies = []
 
-          yarn_source = Gurney::Source::Yarn.new
-          dependencies.concat yarn_source.dependencies || []
+          if g.ls_tree(branch)['blob'].key?('yarn.lock')
+            yarn_lock = g.show("#{branch}:yarn.lock")
+            yarn_source = Gurney::Source::Yarn.new(yarn_lock: yarn_lock)
+            dependencies.concat yarn_source.dependencies || []
+          end
 
-          bundler_source = Gurney::Source::Bundler.new
-          dependencies.concat bundler_source.dependencies || []
+          if g.ls_tree(branch)['blob'].key?('Gemfile.lock')
+            gemfile_lock = g.show("#{branch}:Gemfile.lock")
+            bundler_source = Gurney::Source::Bundler.new(gemfile_lock: gemfile_lock)
+            dependencies.concat bundler_source.dependencies || []
+          end
 
           dependencies.compact!
-
 
           api = Gurney::Api.new(base_url: options.api_url, token: options.api_token)
           api.post_dependencies(dependencies: dependencies, branch: branch, project_id: options.project_id)
@@ -94,18 +87,14 @@ module Gurney
 
       rescue SystemExit
       rescue Gurney::ApiError => e
-        puts "api error:".red
+        puts "Gurney: api error".red
         puts e.message.red
       rescue Gurney::Error => e
-        puts "error:".red
+        puts "Gurney: error".red
         puts e.message.red
       rescue Exception => e
-        puts "an unexpected error occurred:".red
+        puts "Gurney: an unexpected error occurred".red
         puts "#{e.full_message}"
-      ensure
-        if options.hook
-         FileUtils.rm_rf tmp_dir
-        end
       end
     end
   end

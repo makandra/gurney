@@ -18,7 +18,6 @@ Usage: gurney [options]
     -c, --config [CONFIG FILE]       Config file to use
     -h, --hook                       Run as a git post-receive hook
     -p, --project-id [PROJECT ID]    Specify project id for api
-    -t, --tmp-dir [TMP DIR]          Temp dir location for cloning when running as a git hook
         --help
                                      Prints this help
 ```

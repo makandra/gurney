@@ -12,11 +12,9 @@ module Gurney
       @project_id = project_id&.to_s
     end
 
-    def self.from_file(filename)
-      if File.exists? filename
-        config = YAML.load_file(filename).map{|(k,v)| [k.to_sym,v]}.to_h
+    def self.from_yaml(yaml)
+        config = YAML.load(yaml).map{|(k,v)| [k.to_sym,v]}.to_h
         new(**config)
-      end
     end
 
   end

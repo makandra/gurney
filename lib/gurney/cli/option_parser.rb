@@ -8,7 +8,6 @@ module Gurney
       def self.parse(args)
         options = OpenStruct.new
         options.hook = false
-        options.tmp_dir = '/tmp/gurney'
         options.config_file = 'gurney.yml'
 
         option_parser = ::OptionParser.new do |opts|
@@ -35,10 +34,6 @@ module Gurney
 
           opts.on('-p', '--project-id [PROJECT ID]', 'Specify project id for api') do |project_id|
             options.project_id = project_id
-          end
-
-          opts.on('-t', '--tmp-dir [TMP DIR]', 'Temp dir location for cloning when running as a git hook') do |tmp_dir|
-            options.tmp_dir = tmp_dir
           end
 
           opts.on_tail('', '--help', 'Prints this help') do
