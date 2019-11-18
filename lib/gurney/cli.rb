@@ -4,6 +4,7 @@ require 'colorize'
 require 'open3'
 require 'git'
 require 'fileutils'
+require 'byebug'
 
 module Gurney
   class CLI
@@ -22,20 +23,18 @@ module Gurney
           end
           g = Git.open('.')
         end
-
-        if g.ls_tree("master")['blob'].key?(options.config_file)
-          config = Gurney::Config.from_yaml(g.show("master:#{options.config_file}"))
-
-          options.branches ||= config.branches
-          options.api_token ||= config.api_token
-          options.api_url ||= config.api_url
-          options.project_id ||= config.project_id
-        else
-          if options.hook
-            # dont run as a hook with no config
-            exit 0
-          end
+        config_file = read_file(g, options.hook, 'master', options.config_file)
+        if !config_file && options.hook
+          # dont run as a hook with no config
+          exit 0
         end
+        config_file ||= '---'
+        config = Gurney::Config.from_yaml(config_file)
+
+        options.branches ||= config&.branches
+        options.api_token ||= config&.api_token
+        options.api_url ||= config&.api_url
+        options.project_id ||= config&.project_id
 
         if [options.project_id, options.branches, options.api_url, options.api_token].any?(&:nil?)
           raise Gurney::Error.new("Either provide in a config file or set the flags for project id, branches, api url and api token")
@@ -64,17 +63,11 @@ module Gurney
         branches.each do |branch|
           dependencies = []
 
-          if g.ls_tree(branch)['blob'].key?('yarn.lock')
-            yarn_lock = g.show("#{branch}:yarn.lock")
-            yarn_source = Gurney::Source::Yarn.new(yarn_lock: yarn_lock)
-            dependencies.concat yarn_source.dependencies || []
-          end
+          yarn_source = Gurney::Source::Yarn.new(yarn_lock: read_file(g, options.hook, branch, 'yarn.lock'))
+          dependencies.concat yarn_source.dependencies || []
 
-          if g.ls_tree(branch)['blob'].key?('Gemfile.lock')
-            gemfile_lock = g.show("#{branch}:Gemfile.lock")
-            bundler_source = Gurney::Source::Bundler.new(gemfile_lock: gemfile_lock)
-            dependencies.concat bundler_source.dependencies || []
-          end
+          bundler_source = Gurney::Source::Bundler.new(gemfile_lock: read_file(g, options.hook, branch, 'Gemfile.lock'))
+          dependencies.concat bundler_source.dependencies || []
 
           dependencies.compact!
 
@@ -97,6 +90,21 @@ module Gurney
         puts "#{e.full_message}"
       end
     end
+
+    private
+
+    def self.read_file(git, from_git, branch, filename)
+      if from_git
+        if git.ls_tree(branch)['blob'].key?(filename)
+          return git.show("#{branch}:#{filename}")
+        end
+      else
+        if File.exists? filename
+          return File.read filename
+        end
+      end
+    end
+
   end
 
   class Error < Exception

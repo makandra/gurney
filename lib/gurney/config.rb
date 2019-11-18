@@ -13,7 +13,7 @@ module Gurney
     end
 
     def self.from_yaml(yaml)
-        config = YAML.load(yaml).map{|(k,v)| [k.to_sym,v]}.to_h
+        config = YAML.load(yaml)&.map{|(k,v)| [k.to_sym,v]}.to_h
         new(**config)
     end
 
