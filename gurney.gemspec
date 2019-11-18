@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "gurney/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "gurney"
+  spec.name          = "gurney_client"
   spec.version       = Gurney::VERSION
   spec.authors       = ["Martin Schaflitzl"]
   spec.email         = ["martin.schaflitzl@makandra.de"]
