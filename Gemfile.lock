@@ -1,3 +1,12 @@
+PATH
+  remote: .
+  specs:
+    gurney_client (0.1.2)
+      bundler (< 3)
+      colorize (~> 0.8)
+      git (~> 1.5)
+      httparty (~> 0.17.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -30,11 +39,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler
   byebug
-  colorize
-  git
-  httparty
+  gurney_client!
   rspec
 
 BUNDLED WITH

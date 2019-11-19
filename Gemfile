@@ -1,8 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'colorize'
-gem 'httparty'
+gemspec
+
 gem 'rspec'
 gem 'byebug'
-gem 'bundler'
-gem 'git'
