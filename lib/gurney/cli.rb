@@ -94,7 +94,7 @@ module Gurney
 
     def self.read_file(git, from_git, branch, filename)
       if from_git
-        if git.ls_tree(branch)['blob'].key?(filename)
+        if git.branches[branch] && git.ls_tree(branch)['blob'].key?(filename)
           return git.show("#{branch}:#{filename}")
         end
       else
