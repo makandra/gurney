@@ -86,7 +86,7 @@ module Gurney
         puts e.message.red
       rescue Exception => e
         puts "Gurney: an unexpected error occurred".red
-        puts "#{e.full_message}"
+        raise
       end
     end
 
