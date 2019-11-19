@@ -4,7 +4,6 @@ require 'colorize'
 require 'open3'
 require 'git'
 require 'fileutils'
-require 'byebug'
 
 module Gurney
   class CLI
