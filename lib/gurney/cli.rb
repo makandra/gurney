@@ -94,8 +94,10 @@ module Gurney
 
     def self.read_file(git, from_git, branch, filename)
       if from_git
-        if git.branches[branch] && git.ls_tree(branch)['blob'].key?(filename)
-          return git.show("#{branch}:#{filename}")
+        begin
+          git.show("#{branch}:#{filename}")
+        rescue Git::GitExecuteError
+          # happens if branch does not exist
         end
       else
         if File.exists? filename
