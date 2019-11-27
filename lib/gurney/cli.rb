@@ -44,7 +44,7 @@ module Gurney
           # we get passed changed branches and refs via stdin
           $stdin.each_line do |line|
             matches = line.match(HOOK_STDIN_REGEX)
-            unless matches[:new] == '0' * 40
+            if matches && matches[:new] != '0' * 40
               if options.branches.include? matches[:ref]
                 branches << matches[:ref]
               end

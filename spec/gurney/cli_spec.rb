@@ -57,5 +57,15 @@ describe Gurney::CLI do
       end
     end
 
+    it 'does not crash when receiving tags (BUGFIX)' do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("GIT_DIR").and_return(".git")
+      expect_any_instance_of(Gurney::Api).not_to receive(:post_json)
+
+      with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/tags/v1') do
+       silent { Gurney::CLI.run('--hook'.split(' ')) }
+      end
+    end
+
   end
 end
