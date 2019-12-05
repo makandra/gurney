@@ -57,6 +57,14 @@ describe Gurney::CLI do
       end
     end
 
+    it 'does work as a client-side hook' do
+      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
+
+      with_stdin('refs/heads/master aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') do
+       silent { Gurney::CLI.run('--client-hook'.split(' ')) }
+      end
+    end
+
     it 'does not crash when receiving tags (BUGFIX)' do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("GIT_DIR").and_return(".git")

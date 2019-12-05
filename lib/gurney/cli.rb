@@ -9,6 +9,7 @@ module Gurney
   class CLI
 
     HOOK_STDIN_REGEX = /(?<old>[0-9a-f]{40}) (?<new>[0-9a-f]{40}) refs\/heads\/(?<ref>\w+)/m
+    CLIENT_HOOK_STDIN_REGEX = /refs\/heads\/(?<ref>\w+) (?<new>[0-9a-f]{40}) refs\/heads\/(?<remote_ref>\w+) (?<remote_sha>[0-9a-f]{40})/m
 
     def self.run(cmd_parameter=[])
       options = Gurney::CLI::OptionParser.parse(cmd_parameter)
@@ -31,6 +32,7 @@ module Gurney
         config = Gurney::Config.from_yaml(config_file)
 
         options.branches ||= config&.branches
+        options.branches ||= config&.branches
         options.api_token ||= config&.api_token
         options.api_url ||= config&.api_url
         options.project_id ||= config&.project_id
@@ -40,10 +42,11 @@ module Gurney
         end
 
         branches = []
-        if options.hook
+        if options.hook || options.client_hook
           # we get passed changed branches and refs via stdin
           $stdin.each_line do |line|
-            matches = line.match(HOOK_STDIN_REGEX)
+            regex = options.client_hook ? CLIENT_HOOK_STDIN_REGEX : HOOK_STDIN_REGEX
+            matches = line.match(regex)
             if matches && matches[:new] != '0' * 40
               if options.branches.include? matches[:ref]
                 branches << matches[:ref]
@@ -62,10 +65,10 @@ module Gurney
         branches.each do |branch|
           dependencies = []
 
-          yarn_source = Gurney::Source::Yarn.new(yarn_lock: read_file(g, options.hook, branch, 'yarn.lock'))
+          yarn_source = Gurney::Source::Yarn.new(yarn_lock: read_file(g, options.hook || options.client_hook, branch, 'yarn.lock'))
           dependencies.concat yarn_source.dependencies || []
 
-          bundler_source = Gurney::Source::Bundler.new(gemfile_lock: read_file(g, options.hook, branch, 'Gemfile.lock'))
+          bundler_source = Gurney::Source::Bundler.new(gemfile_lock: read_file(g, options.hook || options.client_hook, branch, 'Gemfile.lock'))
           dependencies.concat bundler_source.dependencies || []
 
           dependencies.compact!

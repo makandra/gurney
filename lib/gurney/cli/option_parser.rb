@@ -8,6 +8,7 @@ module Gurney
       def self.parse(args)
         options = OpenStruct.new
         options.hook = false
+        options.client_hook = false
         options.config_file = 'gurney.yml'
 
         option_parser = ::OptionParser.new do |opts|
@@ -20,7 +21,7 @@ module Gurney
             options.api_url = api_url
           end
 
-          opts.on('', '--api-token [API TOKEN]', 'Token to be send to api in the X-AuthToken header') do |api_token|
+          opts.on('', '--api-token [API TOKEN]', 'Token to be send to the api in the X-AuthToken header') do |api_token|
             options.api_token = api_token
           end
 
@@ -30,6 +31,10 @@ module Gurney
 
           opts.on('-h', '--hook', 'Run as a git post-receive hook') do |hook|
             options.hook = hook
+          end
+
+          opts.on('', '--client-hook', 'Run as a git pre-push hook') do |client_hook|
+            options.client_hook = client_hook
           end
 
           opts.on('-p', '--project-id [PROJECT ID]', 'Specify project id for api') do |project_id|

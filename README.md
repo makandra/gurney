@@ -17,6 +17,8 @@ Usage: gurney [options]
                                      Token to be send to the api in the X-AuthToken header
     -c, --config [CONFIG FILE]       Config file to use
     -h, --hook                       Run as a git post-receive hook
+        --client-hook
+                                     Run as a git pre-push hook
     -p, --project-id [PROJECT ID]    Specify project id for api
         --help
                                      Prints this help
