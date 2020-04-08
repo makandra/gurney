@@ -71,6 +71,9 @@ module Gurney
           bundler_source = Gurney::Source::Bundler.new(gemfile_lock: read_file(g, options.hook || options.client_hook, branch, 'Gemfile.lock'))
           dependencies.concat bundler_source.dependencies || []
 
+          ruby_version_source = Gurney::Source::RubyVersion.new(ruby_version: read_file(g, options.hook || options.client_hook, branch, '.ruby-version'))
+          dependencies.concat ruby_version_source.dependencies || []
+
           dependencies.compact!
 
           api = Gurney::Api.new(base_url: options.api_url, token: options.api_token)

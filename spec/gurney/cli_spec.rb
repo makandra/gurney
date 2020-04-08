@@ -31,6 +31,7 @@ describe Gurney::CLI do
             Gurney::Dependency.new(ecosystem: 'npm', name: 'abbrev', version: '1.1.1'),
             Gurney::Dependency.new(ecosystem: 'npm', name: 'accepts', version: '1.3.4'),
             Gurney::Dependency.new(ecosystem: 'npm', name: 'accepts', version: '1.3.5'),
+            Gurney::Dependency.new(ecosystem: 'ruby', name: 'ruby', version: '2.3.8'),
           ),
           branch: 'master',
           project_id: '1').and_return(double)
@@ -39,7 +40,7 @@ describe Gurney::CLI do
 
     it 'prints success message to stdout' do
       expect_any_instance_of(Gurney::Api).to receive(:post_json).with(anything, anything).and_return(double)
-      expect { Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 3, rubygems: 5)\n").to_stdout
+      expect { Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 3, rubygems: 5, ruby: 1)\n").to_stdout
     end
 
     it 'overwrites options from the config with command line parameter' do
