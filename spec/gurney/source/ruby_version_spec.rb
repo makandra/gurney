@@ -1,8 +1,8 @@
-describe Gurney::Source::Bundler do
+describe Gurney::Source::RubyVersion do
 
   describe 'dependencies' do
     it 'parses a .ruby-version file' do
-      bundler = Gurney::Source::RubyVersion.new(ruby_version: File.read('spec/fixtures/test_project/.ruby-version'))
+      bundler = described_class.new(ruby_version: File.read('spec/fixtures/test_project/.ruby-version'))
       dependencies = bundler.dependencies
 
       expect(dependencies.count).to eq 1
