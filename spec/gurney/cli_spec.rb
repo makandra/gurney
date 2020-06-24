@@ -58,6 +58,17 @@ describe Gurney::CLI do
       end
     end
 
+    it 'does work as a hook when GIT_DIR is not set (issue with Gitlab)' do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("GIT_DIR").and_return(nil)
+      allow(Dir).to receive(:pwd).and_return(".git")
+      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
+
+      with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master') do
+       silent { Gurney::CLI.run('--hook'.split(' ')) }
+      end
+    end
+
     it 'does work as a client-side hook' do
       expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
 

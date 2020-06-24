@@ -16,7 +16,7 @@ module Gurney
 
       begin
         if options.hook
-          g = Git.bare(ENV['GIT_DIR'])
+          g = Git.bare(ENV['GIT_DIR'] || Dir.pwd)
         else
           unless Dir.exists? './.git'
             raise Gurney::Error.new('Must be run within a git repository')
