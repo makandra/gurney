@@ -11,6 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'Gurney is a small tool to extract yarn and RubyGems dependencies from project files and report them to a web api.'
   spec.homepage      = "https://github.com/makandra/gurney"
   spec.license       = "MIT"
+  spec.metadata      = { 'rubygmes_mfa_required' => 'true' }
 
   spec.files         = `git ls-files`.split("\n").reject { |f| f.match(%r{^(test|spec|features|bin)/}) }
   spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
