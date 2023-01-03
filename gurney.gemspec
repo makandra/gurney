@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency 'colorize', '~> 0.8'
-  spec.add_runtime_dependency 'httparty', '~> 0.17.1'
+  spec.add_runtime_dependency 'httparty', '>= 0.17.1', '< 0.22.0'
   spec.add_runtime_dependency 'bundler', '< 3'
   spec.add_runtime_dependency 'git', '~> 1.5'
 end
