@@ -1,10 +1,12 @@
 describe Gurney::CLI do
   describe 'run' do
 
+    let(:main_branch) { 'master' }
+
     # create a temporary git repository within the fixtures to avoid committing it into the main repository
     around :example do |example|
       Dir.chdir('spec/fixtures/test_project') do
-        g = Git.init
+        g = Git.init('.', initial_branch: main_branch)
         g.add(:all=>true)
         g.commit 'init commit'
         begin
@@ -85,6 +87,22 @@ describe Gurney::CLI do
       with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/tags/v1') do
        silent { Gurney::CLI.run('--hook'.split(' ')) }
       end
+    end
+
+    context 'with main branch named "main"' do
+
+      let(:main_branch) { 'main' }
+
+      it 'reports when run as a hook (BUGFIX)' do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("GIT_DIR").and_return(".git")
+        expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
+
+        with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master') do
+         silent { Gurney::CLI.run('--hook'.split(' ')) }
+        end
+      end
+
     end
 
   end

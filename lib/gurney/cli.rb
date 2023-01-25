@@ -7,9 +7,9 @@ require 'fileutils'
 
 module Gurney
   class CLI
-
     HOOK_STDIN_REGEX = /(?<old>[0-9a-f]{40}) (?<new>[0-9a-f]{40}) refs\/heads\/(?<ref>\w+)/m
     CLIENT_HOOK_STDIN_REGEX = /refs\/heads\/(?<ref>\w+) (?<new>[0-9a-f]{40}) refs\/heads\/(?<remote_ref>\w+) (?<remote_sha>[0-9a-f]{40})/m
+    MAIN_BRANCHES = ['master', 'main'].freeze
 
     def self.run(cmd_parameter=[])
       options = Gurney::CLI::OptionParser.parse(cmd_parameter)
@@ -23,7 +23,10 @@ module Gurney
           end
           g = Git.open('.')
         end
-        config_file = read_file(g, options.hook, 'master', options.config_file)
+        config_file = MAIN_BRANCHES.find do |branch|
+          file = read_file(g, options.hook, branch, options.config_file)
+          break file if file
+        end
         if !config_file && options.hook
           # dont run as a hook with no config
           exit 0
