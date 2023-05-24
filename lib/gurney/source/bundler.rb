@@ -1,5 +1,7 @@
 require 'bundler'
 
+Bundler.ui.level = 'error'
+
 module Gurney
   module Source
     class Bundler < Base

@@ -1,6 +1,10 @@
 describe Gurney::Source::Bundler do
 
   describe 'dependencies' do
+    it 'sets bundlers output level to "error"' do
+      expect(Bundler.ui.level).to eq('error')
+    end
+
     it 'parses correct bundler lockfiles' do
       bundler = Gurney::Source::Bundler.new(gemfile_lock: File.read('spec/fixtures/test_project/Gemfile.lock'))
       dependencies = bundler.dependencies
