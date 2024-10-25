@@ -18,7 +18,7 @@ module Gurney
         if options.hook
           g = Git.bare(ENV['GIT_DIR'] || Dir.pwd)
         else
-          unless Dir.exists? './.git'
+          unless Dir.exist? './.git'
             raise Gurney::Error.new('Must be run within a git repository')
           end
           g = Git.open('.')
@@ -109,7 +109,7 @@ module Gurney
           # happens if branch does not exist
         end
       else
-        if File.exists? filename
+        if File.exist? filename
           return File.read filename
         end
       end
