@@ -8,9 +8,11 @@ module SpecHelper
 
   def with_stdin(input)
     $stdin = StringIO.new
+    $stdin.set_encoding(Encoding::ASCII) # Apparently what it is on the server
     $stdin.puts(input)
     $stdin.rewind
     yield
+  ensure
     $stdin = STDIN
   end
 

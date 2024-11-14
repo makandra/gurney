@@ -49,6 +49,7 @@ module Gurney
           # we get passed changed branches and refs via stdin
           $stdin.each_line do |line|
             regex = options.client_hook ? CLIENT_HOOK_STDIN_REGEX : HOOK_STDIN_REGEX
+            line.force_encoding(Encoding::UTF_8)
             matches = line.match(regex)
             if matches && matches[:new] != '0' * 40
               if options.branches.include? matches[:ref]

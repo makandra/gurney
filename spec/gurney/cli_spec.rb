@@ -79,6 +79,12 @@ describe Gurney::CLI do
       end
     end
 
+    it 'does not crash on utf8 chars in branch names' do
+      with_stdin('refs/heads/ö abc refs/heads/ö abc') do
+        expect { Gurney::CLI.run('--client-hook'.split(' ')) }.not_to raise_error
+      end
+    end
+
     it 'does not crash when receiving tags (BUGFIX)' do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("GIT_DIR").and_return(".git")
