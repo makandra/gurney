@@ -1,9 +1,9 @@
 describe Gurney::CLI do
-  describe 'run' do
 
+  describe '.run' do
     let(:main_branch) { 'master' }
 
-    # create a temporary git repository within the fixtures to avoid committing it into the main repository
+    # Create a temporary Git repository within the fixtures to avoid committing it into the main repository
     around :example do |example|
       Dir.chdir('spec/fixtures/test_project') do
         g = Git.init('.', initial_branch: main_branch)
@@ -17,8 +17,18 @@ describe Gurney::CLI do
       end
     end
 
+    def expect_report(to: 'http://example.com/project/1/branch/master')
+      expect_any_instance_of(Gurney::Api).to receive(:post_json).with(to, anything).and_return(double)
+    end
+
+    def run_with_branch_info(branch_info, mode: '--hook')
+      with_stdin(branch_info) do
+        silent { Gurney::CLI.run([mode]) }
+      end
+    end
+
     it 'does query the correct url' do
-      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
+      expect_report to: 'http://example.com/project/1/branch/master'
       silent { Gurney::CLI.run }
     end
 
@@ -40,72 +50,58 @@ describe Gurney::CLI do
       silent { Gurney::CLI.run }
     end
 
-    it 'prints success message to stdout' do
-      expect_any_instance_of(Gurney::Api).to receive(:post_json).with(anything, anything).and_return(double)
+    it 'prints a success message to stdout' do
+      expect_report
       expect { Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 3, rubygems: 5, ruby: 1)\n").to_stdout
     end
 
     it 'overwrites options from the config with command line parameter' do
-      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://test.example.com/project/2/branch/master', anything).and_return(double)
-      silent { Gurney::CLI.run('-c incomplete_config.yml --project-id 2 --api-url http://test.example.com/project/<project_id>/branch/<branch>'.split(' ')) }
+      expect_report to: 'http://test.example.com/project/2/branch/master'
+      silent { Gurney::CLI.run(%w[-c incomplete_config.yml --project-id 2 --api-url http://test.example.com/project/<project_id>/branch/<branch>]) }
     end
 
-    it 'does work as a hook' do
-      allow(ENV).to receive(:[]).and_call_original
-      allow(ENV).to receive(:[]).with("GIT_DIR").and_return(".git")
-      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
-
-      with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master') do
-       silent { Gurney::CLI.run('--hook'.split(' ')) }
-      end
+    it 'can run as a client-side pre-push hook' do
+      expect_report
+      run_with_branch_info 'refs/heads/master 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        mode: '--client-hook'
     end
 
-    it 'does work as a hook when GIT_DIR is not set (issue with Gitlab)' do
-      allow(ENV).to receive(:[]).and_call_original
-      allow(ENV).to receive(:[]).with("GIT_DIR").and_return(nil)
-      allow(Dir).to receive(:pwd).and_return(".git")
-      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
-
-      with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master') do
-       silent { Gurney::CLI.run('--hook'.split(' ')) }
-      end
-    end
-
-    it 'does work as a client-side hook' do
-      expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
-
-      with_stdin('refs/heads/master aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') do
-       silent { Gurney::CLI.run('--client-hook'.split(' ')) }
-      end
-    end
-
-    it 'does not crash on utf8 chars in branch names' do
-      with_stdin('refs/heads/ö abc refs/heads/ö abc') do
-        expect { Gurney::CLI.run('--client-hook'.split(' ')) }.not_to raise_error
-      end
-    end
-
-    it 'does not crash when receiving tags (BUGFIX)' do
-      allow(ENV).to receive(:[]).and_call_original
-      allow(ENV).to receive(:[]).with("GIT_DIR").and_return(".git")
-      expect_any_instance_of(Gurney::Api).not_to receive(:post_json)
-
-      with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/tags/v1') do
-       silent { Gurney::CLI.run('--hook'.split(' ')) }
-      end
-    end
-
-    context 'with main branch named "main"' do
-
-      let(:main_branch) { 'main' }
-
-      it 'reports when run as a hook (BUGFIX)' do
+    describe '(remote post-receive hook mode)' do
+      before do
         allow(ENV).to receive(:[]).and_call_original
         allow(ENV).to receive(:[]).with("GIT_DIR").and_return(".git")
-        expect_any_instance_of(Gurney::Api).to receive(:post_json).with('http://example.com/project/1/branch/master', anything).and_return(double)
+      end
 
-        with_stdin('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master') do
-         silent { Gurney::CLI.run('--hook'.split(' ')) }
+      it 'works' do
+        expect_report
+        run_with_branch_info '123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master'
+      end
+
+      it 'works when GIT_DIR is not set (issue with GitLab)' do
+        allow(ENV).to receive(:[]).with("GIT_DIR").and_return(nil)
+        allow(Dir).to receive(:pwd).and_return(".git")
+
+        expect_report
+        run_with_branch_info '123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master'
+      end
+
+      it 'does not crash on utf8 chars in branch names' do
+        with_stdin('refs/heads/ö 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/ö 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') do
+          expect { Gurney::CLI.run('--client-hook'.split(' ')) }.not_to raise_error
+        end
+      end
+
+      it 'does not crash when receiving tags (BUGFIX)' do
+        expect_any_instance_of(Gurney::Api).not_to receive(:post_json)
+        run_with_branch_info '123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/tags/v1'
+      end
+
+      context 'with main branch named "main"' do
+        let(:main_branch) { 'main' }
+
+        it 'works' do
+          expect_report
+          run_with_branch_info '123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 123abcaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master'
         end
       end
 

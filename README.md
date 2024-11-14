@@ -1,30 +1,31 @@
-## Gurney
+# Gurney
 
-Gurney is a small tool to extract dependencies from project files and report them to a web api.
-It can either run locally or as a git post-receive hook in gitlab.
+Gurney is a small tool to extract dependencies from project files and report
+them to a web API. Modes:
+- normal
+- local pre-push hook
+- remote post-receive hook
+Usually, we configure the latter on our Git server to automatically run on each
+push, with the API url passed as command line option.
 
-When run as a git hook, the project gets cloned on the git server and gurney then looks for a `gurney.yml` within the project files. 
-If its present gurney looks at the pushed branches and analyses the ones specified in the config for dependencies. 
-It then reports them to the web api also specified in the config.
+When run as a post-receive hook, Gurney will make a bare copy of the project and 
+look for a gurney.yml file. If present, Gurney looks at the configured branches
+and collects their dependencies. These are reported to the web API.
 
-#### Usage:
+## Usage
 ```
 Usage: gurney [options]
-        --api-url [API URL]
-                                     Url for web api call, can have parameters for <project_id> and <branch>
-                                     example: --api-url "http://example.com/project/<project_id>/branch/<branch>"
-        --api-token [API TOKEN]
-                                     Token to be send to the api in the X-AuthToken header
+        --api-url [API URL]          Url for web API call, can have parameters for <project_id> and <branch>
+                                     Example: --api-url "https://example.com/project/<project_id>/branch/<branch>"
+        --api-token [API TOKEN]      Token to be sent to the API in the X-AuthToken header
     -c, --config [CONFIG FILE]       Config file to use
-    -h, --hook                       Run as a git post-receive hook
-        --client-hook
-                                     Run as a git pre-push hook
-    -p, --project-id [PROJECT ID]    Specify project id for api
-        --help
-                                     Prints this help
+    -h, --hook                       Run as a Git post-receive hook
+        --client-hook                Run as a Git pre-push hook
+    -p, --project-id [PROJECT ID]    Specify project id for API
+        --help                       Print this help
 ```
 
-#### Sample Config:
+## Sample Config
 ```yaml
 project_id: 1
 branches:
@@ -34,5 +35,13 @@ api_url: http://example.com/dep_reporter/project/<project_id>/branch/<branch>
 api_token: 1234567890
 ```
 
-##### Running as a global git hook
-To run as a global git hook in your gitlab see https://docs.gitlab.com/ee/administration/custom_hooks.html#set-a-global-git-hook-for-all-repositories
+## Running as a global Git hook
+See https://docs.gitlab.com/ee/administration/server_hooks.html#create-global-server-hooks-for-all-repositories
+
+## Development
+You can run Gurney locally from another directory like this:
+
+```bash
+cd some/real/project
+ruby -I path/to/gurney/lib path/to/gurney/exe/gurney
+```
