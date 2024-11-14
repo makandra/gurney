@@ -63,7 +63,7 @@ module Gurney
     end
 
     def run
-      get_branches.each do |branch|
+      reporting_branches.each do |branch|
         dependencies = []
 
         yarn_source = Gurney::Source::Yarn.new(yarn_lock: read_file(options.hook || options.client_hook, branch, 'yarn.lock'))
@@ -78,7 +78,7 @@ module Gurney
         dependencies.compact!
 
         api = Gurney::Api.new(base_url: options.api_url, token: options.api_token)
-        api.post_dependencies(dependencies: dependencies, branch: branch, project_id: options.project_id)
+        api.post_dependencies(dependencies: dependencies, branch: branch, project_id: options.project_id, repo_path: git.repo.path)
 
         dependency_counts = dependencies.group_by(&:ecosystem).map{|ecosystem, dependencies| "#{ecosystem}: #{dependencies.count}" }.join(', ')
         puts "Gurney: reported dependencies (#{dependency_counts})"
@@ -89,7 +89,7 @@ module Gurney
 
     attr_accessor :git, :options
 
-    def get_branches
+    def reporting_branches
       branches = []
       if options.hook || options.client_hook
         # We get changed branches and refs via stdin

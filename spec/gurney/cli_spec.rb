@@ -21,9 +21,13 @@ describe Gurney::CLI do
       expect_any_instance_of(Gurney::Api).to receive(:post_json).with(to, anything).and_return(double)
     end
 
-    def run_with_branch_info(branch_info, mode: '--hook')
+    def run_with_branch_info(branch_info, mode: '--hook', debug: false)
       with_stdin(branch_info) do
-        silent { Gurney::CLI.run([mode]) }
+        if debug
+          Gurney::CLI.run([mode])
+        else
+          silent { Gurney::CLI.run([mode]) }
+        end
       end
     end
 
@@ -46,7 +50,9 @@ describe Gurney::CLI do
             Gurney::Dependency.new(ecosystem: 'ruby', name: 'ruby', version: '2.3.8'),
           ),
           branch: 'master',
-          project_id: '1').and_return(double)
+          project_id: '1',
+          repo_path: instance_of(String),
+        ).and_return(double)
       silent { Gurney::CLI.run }
     end
 
@@ -85,6 +91,16 @@ describe Gurney::CLI do
         run_with_branch_info '123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master'
       end
 
+      # Ambulance will complain if that ever changes. This is to prevent Gurney
+      # reporting to the wrong project after a project fork.
+      it 'sends the repository path along' do
+        expect_any_instance_of(Gurney::Api)
+          .to receive(:post_dependencies)
+          .with(hash_including(dependencies: instance_of(Array), repo_path: %r{spec/fixtures/test_project/.git$}))
+          .and_return(double)
+        run_with_branch_info '123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/master'
+      end
+
       it 'does not crash on utf8 chars in branch names' do
         with_stdin('refs/heads/ö 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/ö 123abcdefaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') do
           expect { Gurney::CLI.run('--client-hook'.split(' ')) }.not_to raise_error
@@ -108,4 +124,5 @@ describe Gurney::CLI do
     end
 
   end
+
 end

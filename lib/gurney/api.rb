@@ -9,13 +9,14 @@ module Gurney
       @token = token
     end
 
-    def post_dependencies(dependencies:, branch:, project_id:)
-      data = {
-          dependencies: dependencies
-      }
+    def post_dependencies(dependencies:, branch:, project_id:, repo_path: nil)
+      data = { dependencies: dependencies }
+      data[:repository_path] = repo_path if repo_path
+
       url = base_url
       url.gsub! '<project_id>', CGI.escape(project_id)
       url.gsub! '<branch>', CGI.escape(branch)
+
       post_json(url, data.to_json)
     end
 
@@ -31,7 +32,7 @@ module Gurney
       )
       unless response.success?
         if response.code == 404
-          raise ApiError.new("#{response.code} api url is probably wrong")
+          raise ApiError.new("#{response.code} API url is probably wrong")
         else
           raise ApiError.new("#{response.code} #{response.body}")
         end
