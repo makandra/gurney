@@ -1,0 +1,16 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  unpoly:
+    specifier: ^3.0.0
+    version: 3.10.2
+
+packages:
+
+  /unpoly@3.10.2:
+    resolution: {integrity: sha512-OUnAzDYxgHeqXUhc3PBScXfB6syH8HcYg35pED46u1PzAmt83EcJuN8+NS/FD9Cq2d1I1XIOc9klLqQ1YhVYWw==}
+    dev: false
