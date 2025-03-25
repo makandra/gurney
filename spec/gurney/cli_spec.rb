@@ -3,19 +3,7 @@ describe Gurney::CLI do
   describe '.run' do
     let(:main_branch) { 'master' }
 
-    # Create a temporary Git repository within the fixtures to avoid committing it into the main repository
-    around :example do |example|
-      Dir.chdir('spec/fixtures/test_project') do
-        g = Git.init('.', initial_branch: main_branch)
-        g.add(:all=>true)
-        g.commit 'init commit'
-        begin
-          example.run
-        ensure
-          FileUtils.rm_rf '.git'
-        end
-      end
-    end
+    include_context 'within a temporary git repository'
 
     def expect_report(to: 'http://example.com/project/1/branch/master')
       expect_any_instance_of(Gurney::Api).to receive(:post_json).with(to, anything).and_return(double)
@@ -47,6 +35,13 @@ describe Gurney::CLI do
             Gurney::Dependency.new(ecosystem: 'npm', name: 'abbrev', version: '1.1.1'),
             Gurney::Dependency.new(ecosystem: 'npm', name: 'accepts', version: '1.3.4'),
             Gurney::Dependency.new(ecosystem: 'npm', name: 'accepts', version: '1.3.5'),
+            Gurney::Dependency.new(ecosystem: 'npm', name: 'chalk', version: '5.4.1'),
+            Gurney::Dependency.new(ecosystem: 'npm', name: 'commander', version: '13.1.0'),
+            Gurney::Dependency.new(ecosystem: 'npm', name: 'lodash', version: '4.17.21'),
+            Gurney::Dependency.new(ecosystem: 'npm', name: '@fortawesome/fontawesome-free', version: '5.15.4'),
+            Gurney::Dependency.new(ecosystem: 'npm', name: 'bootstrap', version: '4.6.2'),
+            Gurney::Dependency.new(ecosystem: 'npm', name: 'jquery', version: '3.7.1'),
+            Gurney::Dependency.new(ecosystem: 'npm', name: 'popper.js', version: '1.16.1'),
             Gurney::Dependency.new(ecosystem: 'ruby', name: 'ruby', version: '2.3.8'),
           ),
           branch: 'master',
@@ -58,7 +53,7 @@ describe Gurney::CLI do
 
     it 'prints a success message to stdout' do
       expect_report
-      expect { Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 3, rubygems: 5, ruby: 1)\n").to_stdout
+      expect { Gurney::CLI.run }.to output("Gurney: reported dependencies (npm: 10, rubygems: 5, ruby: 1)\n").to_stdout
     end
 
     it 'overwrites options from the config with command line parameter' do

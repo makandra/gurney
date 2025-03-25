@@ -40,7 +40,8 @@ module Gurney
       end
 
       config_file = MAIN_BRANCHES.find do |branch|
-        file = read_file(options.hook, branch, options.config_file)
+        git_file_reader = GitFileReader.new(git, branch, read_from_git: options.hook)
+        file = git_file_reader.read(options.config_file)
         break file if file
       end
       if options.hook && !config_file
@@ -64,18 +65,8 @@ module Gurney
 
     def run
       reporting_branches.each do |branch|
-        dependencies = []
-
-        yarn_source = Gurney::Source::Yarn.new(yarn_lock: read_file(options.hook || options.client_hook, branch, 'yarn.lock'))
-        dependencies.concat yarn_source.dependencies || []
-
-        bundler_source = Gurney::Source::Bundler.new(gemfile_lock: read_file(options.hook || options.client_hook, branch, 'Gemfile.lock'))
-        dependencies.concat bundler_source.dependencies || []
-
-        ruby_version_source = Gurney::Source::RubyVersion.new(ruby_version: read_file(options.hook || options.client_hook, branch, '.ruby-version'))
-        dependencies.concat ruby_version_source.dependencies || []
-
-        dependencies.compact!
+        git_file_reader = GitFileReader.new(git, branch, read_from_git: options.hook || options.client_hook)
+        dependencies = DependencyCollector.new(git_file_reader).collect_all
 
         api = Gurney::Api.new(base_url: options.api_url, token: options.api_token)
         api.post_dependencies(dependencies: dependencies, branch: branch, project_id: options.project_id, repo_path: git.repo.path)
@@ -113,18 +104,6 @@ module Gurney
       end
 
       branches
-    end
-
-    def read_file(from_git, branch, filename)
-      if from_git
-        begin
-          git.show("#{branch}:#{filename}")
-        rescue Git::GitExecuteError
-          # happens if branch does not exist
-        end
-      else
-        File.read(filename) if File.exist?(filename)
-      end
     end
 
   end

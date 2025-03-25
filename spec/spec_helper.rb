@@ -18,6 +18,8 @@ module SpecHelper
 
 end
 
+Dir[File.join(__dir__, 'support/**/*.rb')].each { |f| require f }
+
 RSpec.configure do |conf|
   conf.include(SpecHelper)
 end
