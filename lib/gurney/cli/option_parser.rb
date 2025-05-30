@@ -41,6 +41,10 @@ module Gurney
             options.project_id = project_id
           end
 
+          opts.on('', '--prefix [PATH]', 'Specify the prefix of dependency paths') do |prefix|
+            options.prefix = prefix
+          end
+
           opts.on_tail('', '--help', 'Prints this help') do
             puts opts
             exit

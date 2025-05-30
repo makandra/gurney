@@ -56,8 +56,9 @@ module Gurney
       options.api_token ||= config&.api_token
       options.api_url ||= config&.api_url
       options.project_id ||= config&.project_id
+      options.prefix ||= config&.prefix
 
-      missing_options = [:project_id, :branches, :api_url, :api_token].select { |option| options.send(option).nil? }
+      missing_options = [:project_id, :branches, :api_url, :api_token, :prefix].select { |option| options.send(option).nil? }
       # Use the line below in development
       # missing_options = [:project_id, :branches, :api_token].select { |option| options.send(option).nil? }
       raise Gurney::Error.new("Incomplete config - missing #{missing_options.map(&:inspect).join(', ')}.") unless missing_options.empty?
@@ -65,7 +66,7 @@ module Gurney
 
     def run
       reporting_branches.each do |branch|
-        git_file_reader = GitFileReader.new(git, branch, read_from_git: options.hook || options.client_hook)
+        git_file_reader = GitFileReader.new(git, branch, read_from_git: options.hook || options.client_hook, prefix: options.prefix)
         dependencies = DependencyCollector.new(git_file_reader).collect_all
 
         api = Gurney::Api.new(base_url: options.api_url, token: options.api_token)

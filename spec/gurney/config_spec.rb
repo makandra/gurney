@@ -7,6 +7,7 @@ describe Gurney::Config do
       expect(config.project_id).to eq '1'
       expect(config.branches).to contain_exactly 'master', 'main', 'production'
       expect(config.api_url).to eq 'http://example.com/project/<project_id>/branch/<branch>'
+      expect(config.prefix).to eq '.'
     end
   end
 

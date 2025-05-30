@@ -4,7 +4,9 @@ describe Gurney::DependencyCollector do
   let(:git) { @g }
 
   describe '#collect_all' do
-    include_context 'within a temporary git repository'
+    let(:main_branch) { 'master' }
+
+    include_context 'within a temporary git repository', path: 'spec/fixtures/test_project'
 
     it 'collects all dependencies, including npm dependencies from different lock files' do
       dependencies = collector.collect_all
@@ -27,7 +29,7 @@ describe Gurney::DependencyCollector do
         Gurney::Dependency.new(ecosystem: 'ruby', name: 'ruby', version: '2.3.8'),
       )
     end
-    
+
     it 'collects npm dependencies from package-lock.json and pnpm-lock.yaml, if yarn.lock is missing' do
       expect(collector).to receive(:yarn_lock).and_return(nil)
 
