@@ -3,22 +3,22 @@ describe Gurney::CLI do
   describe '.run' do
     let(:main_branch) { 'master' }
 
-    context 'when the dependency files are on top level' do
-      include_context 'within a temporary git repository', path: 'spec/fixtures/test_project'
+    def expect_report(to: 'http://example.com/project/1/branch/master')
+      expect_any_instance_of(Gurney::Api).to receive(:post_json).with(to, anything).and_return(double)
+    end
 
-      def expect_report(to: 'http://example.com/project/1/branch/master')
-        expect_any_instance_of(Gurney::Api).to receive(:post_json).with(to, anything).and_return(double)
-      end
-
-      def run_with_branch_info(branch_info, mode: '--hook', debug: false)
-        with_stdin(branch_info) do
-          if debug
-            Gurney::CLI.run([mode])
-          else
-            silent { Gurney::CLI.run([mode]) }
-          end
+    def run_with_branch_info(branch_info, mode: '--hook', debug: false)
+      with_stdin(branch_info) do
+        if debug
+          Gurney::CLI.run([mode])
+        else
+          silent { Gurney::CLI.run([mode]) }
         end
       end
+    end
+
+    context 'when the dependency files are on top level' do
+      include_context 'within a temporary git repository', path: 'spec/fixtures/test_project'
 
       it 'queries the correct url' do
         expect_report to: 'http://example.com/project/1/branch/master'
@@ -149,8 +149,6 @@ describe Gurney::CLI do
             repo_path: instance_of(String),
           ).and_return(double)
 
-        # We had to set the path to the configuration file per run parameters,
-        # as we didn't want to duplicate the fixtures
         silent { Gurney::CLI.run(%w[--config test_project/gurney.yml --prefix test_project]) }
       end
     end
