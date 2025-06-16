@@ -10,6 +10,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 ### Breaking changes
 
 
+## 0.6.0 2025-06-16
+
+### Compatible changes
+* Added: New option `--prefix` to specify the location of the dependency files
+  in case they are not on root level of your git repository.
+
+
 ## 0.5.0 2025-03-26
 
 ### Compatible changes

@@ -22,6 +22,7 @@ Usage: gurney [options]
     -h, --hook                       Run as a Git post-receive hook
         --client-hook                Run as a Git pre-push hook
     -p, --project-id [PROJECT ID]    Specify project id for API
+        --prefix [PATH]              Specify the prefix of dependency paths
         --help                       Print this help
 ```
 
