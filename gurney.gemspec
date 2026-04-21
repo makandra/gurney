@@ -3,24 +3,27 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "gurney/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "gurney_client"
-  spec.version       = Gurney::VERSION
-  spec.authors       = ["Martin Schaflitzl"]
-  spec.email         = ["martin.schaflitzl@makandra.de"]
+  spec.name = "gurney_client"
+  spec.version = Gurney::VERSION
+  spec.authors = ["Martin Schaflitzl"]
+  spec.email = ["martin.schaflitzl@makandra.de"]
 
-  spec.summary       = 'Gurney is a small tool to extract yarn and RubyGems dependencies from project files and report them to a web api.'
-  spec.homepage      = "https://github.com/makandra/gurney"
-  spec.license       = "MIT"
-  spec.metadata      = { 'rubygems_mfa_required' => 'true' }
+  spec.summary = 'Gurney is a small tool to extract yarn and RubyGems dependencies from project files and report them to a web api.'
+  spec.homepage = "https://github.com/makandra/gurney"
+  spec.license = "MIT"
+  spec.metadata = { 'rubygems_mfa_required' => 'true' }
+  spec.required_ruby_version  = '>= 3.2'
 
-  spec.files         = `git ls-files`.split("\n").reject { |f| f.match(%r{^(test|spec|features|bin)/}) }
-  spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  spec.bindir        = 'exe'
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.files = `git ls-files`.split("\n").reject { |f| f.match(%r{^(test|spec|features|bin)/}) }
+  spec.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
+  spec.bindir = 'exe'
+  spec.executables = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency 'colorize', '~> 0.8'
-  spec.add_runtime_dependency 'httparty', '~> 0.17.1'
-  spec.add_runtime_dependency 'bundler', '< 3'
+  spec.add_runtime_dependency 'httparty', '>= 0.24', '< 1.0'
+  spec.add_runtime_dependency 'bundler', '< 4'
   spec.add_runtime_dependency 'git', '~> 1.5'
+  spec.add_runtime_dependency 'logger', '>= 1.6', '< 2.0'
+  spec.add_runtime_dependency 'ostruct', '>= 0.6', '< 1.0'
 end
