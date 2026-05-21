@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gurney_client (1.0.0)
+    gurney_client (1.0.1)
       bundler (< 4)
       colorize (~> 0.8)
       git (~> 1.5)
