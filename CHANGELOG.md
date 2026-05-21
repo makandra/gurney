@@ -10,6 +10,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 ### Breaking changes
 
 
+## 1.0.1 2026-05-21
+* Fixed broken git hook mode for repositories that do not use a "prefix" config, broken since 0.6.0.
+
+
 ## 1.0.0 2026-04-21
 
 ### Compatible changes
