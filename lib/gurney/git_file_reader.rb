@@ -9,7 +9,7 @@ module Gurney
     end
 
     def read(filename)
-      prefixed_filename = File.join(@prefix, filename)
+      prefixed_filename = @prefix == '.' ? filename : File.join(@prefix, filename)
       if @read_from_git
         begin
           @git.show("#{@branch}:#{prefixed_filename}")
